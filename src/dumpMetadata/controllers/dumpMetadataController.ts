@@ -3,10 +3,11 @@ import { HttpError } from 'express-openapi-validator/dist/framework/types';
 import httpStatus from 'http-status-codes';
 import { injectable, inject } from 'tsyringe';
 import { parseISO } from 'date-fns';
+import { ObjectLiteral } from 'typeorm';
 
 import { Services } from '../../common/constants';
 import { ILogger } from '../../common/interfaces';
-import { DumpMetadataResponse } from '../models/dumpMetadata';
+import { DumpMetadataCreation, DumpMetadataResponse } from '../models/dumpMetadata';
 import { DumpMetadataFilter, DumpMetadataFilterQueryParams } from '../models/dumpMetadataFilter';
 import { DumpMetadataManager } from '../models/dumpMetadataManager';
 import { DumpNotFoundError } from '../models/errors';
@@ -18,6 +19,12 @@ interface DumpMetadataParams {
 type GetDumpMetadataByIdHandler = RequestHandler<DumpMetadataParams, DumpMetadataResponse>;
 
 type GetDumpsMetadataHandler = RequestHandler<undefined, DumpMetadataResponse[], undefined, DumpMetadataFilterQueryParams>;
+
+type PostDumpMetadataHandler = RequestHandler<undefined, undefined, DumpMetadataCreation>;
+
+interface InsertionResult extends ObjectLiteral {
+  [key: string]: string;
+}
 
 @injectable()
 export class DumpMetadataController {
@@ -56,5 +63,15 @@ export class DumpMetadataController {
     }
 
     return res.status(httpStatus.OK).json(dumpsMetadata);
+  };
+
+  public post: PostDumpMetadataHandler = async (req, res, next) => {
+    try {
+      const createdId = await this.manager.createDumpMetadata(req.body);
+      this.logger.log('info', `dump metadata created successfully with id: ${createdId}`);
+    } catch (error) {
+      return next(error);
+    }
+    return res.sendStatus(httpStatus.CREATED);
   };
 }
