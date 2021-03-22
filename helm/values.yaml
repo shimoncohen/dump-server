@@ -39,11 +39,11 @@ resources:
       memory: 128Mi
 route:
   enabled: true
+  enableTls: true
   path: /
 
 #internal
 postgresql:
-  postgresqlUsername: internal_postgres
-  postgresqlPassword: internal_password
-  postgresqlDatabase: internal_database
-
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres
+  postgresqlDatabase: postgres

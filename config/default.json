@@ -11,6 +11,9 @@
   "server": {
     "port": "8080"
   },
+  "application": {
+    "authToken": "dQw4w9WgXcQ"
+  },
   "db": {
     "type": "postgres",
     "host": "localhost",

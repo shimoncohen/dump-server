@@ -8,6 +8,9 @@
   "server": {
     "port": "SERVER_PORT"
   },
+  "application": {
+    "authToken": "APPLICATION_AUTH_TOKEN"
+  },
   "db": {
     "type": "DB_TYPE",
     "host": "DB_HOST",

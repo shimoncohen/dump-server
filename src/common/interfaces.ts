@@ -4,6 +4,10 @@ export interface IServerConfig {
   port: string;
 }
 
+export interface IApplicationConfig {
+  authToken: string;
+}
+
 export interface ILogger {
   log: ILogMethod;
 }
