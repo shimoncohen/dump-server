@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/MapColonies/dump-server/compare/v1.0.0...v1.0.1) (2021-05-05)
+
+
+### Bug Fixes
+
+* **configurations:** removed servers list from openapi3.yml ([3e05ee9](https://github.com/MapColonies/dump-server/commit/3e05ee908a8f469a1e0534155d87b1f5bf0b51b2))
+
 ## 1.0.0 (2021-05-03)
 
 
