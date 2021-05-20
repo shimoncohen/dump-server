@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/MapColonies/dump-server/compare/v1.1.0...v1.1.1) (2021-05-20)
+
+
+### Bug Fixes
+
+* **dump:** builds correctly url when setting OBJECT_STORAGE_PROJECT_ID ([#29](https://github.com/MapColonies/dump-server/issues/29)) ([5ac8db3](https://github.com/MapColonies/dump-server/commit/5ac8db34616a646399b79435486902fd07c44986))
+
 ## [1.1.0](https://github.com/MapColonies/dump-server/compare/v1.0.2...v1.1.0) (2021-05-20)
 
 
