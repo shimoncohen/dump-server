@@ -2,11 +2,10 @@ openapi: 3.0.1
 info:
   title: dump-server
   description: A RESTful API for querying and saving planet dump's metadata
-  version: 1.0.0
+  version: 1.1.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-
 paths:
   /dumps:
     get:
@@ -38,10 +37,12 @@ paths:
           description: Date sort order
           schema:
             type: string
-            enum: [asc, desc]
+            enum:
+              - asc
+              - desc
             default: desc
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -49,9 +50,9 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/dumpResponse'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        '5XX':
+        5XX:
           $ref: '#/components/responses/UnexpectedError'
     post:
       operationId: postDump
@@ -66,13 +67,13 @@ paths:
             schema:
               $ref: '#/components/schemas/dumpCreation'
       responses:
-        201:
+        '201':
           description: Created
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        '5XX':
+        5XX:
           $ref: '#/components/responses/UnexpectedError'
   /dumps/{dumpId}:
     get:
@@ -88,19 +89,19 @@ paths:
           required: true
           description: id of the dump to get
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/dumpResponse'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        422:
+        '422':
           $ref: '#/components/responses/UnprocessableEntity'
-        '5XX':
+        5XX:
           $ref: '#/components/responses/UnexpectedError'
 components:
   responses:

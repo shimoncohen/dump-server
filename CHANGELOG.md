@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/MapColonies/dump-server/compare/v1.0.2...v1.1.0) (2021-05-20)
+
+
+### Features
+
+* **configurations:** updates openapi3 version on release ([e96a5f0](https://github.com/MapColonies/dump-server/commit/e96a5f0189c97223ef67f0a45bb0a8b1a15bb6d7))
+
+
+### Bug Fixes
+
+* **helm:** added missing OBJECT_STORAGE_PROJECT_ID variable ([#30](https://github.com/MapColonies/dump-server/issues/30)) ([e73f7d1](https://github.com/MapColonies/dump-server/commit/e73f7d12cc9e552946ab4e8f039c84200433f481))
+
 ### [1.0.2](https://github.com/MapColonies/dump-server/compare/v1.0.1...v1.0.2) (2021-05-05)
 
 
