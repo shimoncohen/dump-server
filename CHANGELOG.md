@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/MapColonies/dump-server/compare/v1.1.1...v1.1.2) (2021-05-25)
+
+
+### Bug Fixes
+
+* merged ci actions and migrations.Dockerfile image to have python for node-gyp ([52aa5d2](https://github.com/MapColonies/dump-server/commit/52aa5d25c0b0eb921b84ef5278d10661ec3a5c59))
+
 ### [1.1.1](https://github.com/MapColonies/dump-server/compare/v1.1.0...v1.1.1) (2021-05-20)
 
 
