@@ -1,4 +1,4 @@
-name: Lint
+name: Lint and Security
 
 on: [pull_request]
 
@@ -33,3 +33,13 @@ jobs:
         with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
          file: ./openapi3.yaml
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
