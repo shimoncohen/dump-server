@@ -60,11 +60,11 @@ Returns the environment from global if exists or from the chart's values, defaul
 {{/*
 Returns the cloud provider name from global if exists or from the chart's values, defaults to minikube
 */}}
-{{- define "dump-server.cloudProviderName" -}}
-{{- if .Values.global.cloudProvider.name }}
-    {{- .Values.global.cloudProvider.name -}}
+{{- define "dump-server.cloudProviderFlavor" -}}
+{{- if .Values.global.cloudProvider.flavor }}
+    {{- .Values.global.cloudProvider.flavor -}}
 {{- else if .Values.cloudProvider -}}
-    {{- .Values.cloudProvider.name | default "minikube" -}}
+    {{- .Values.cloudProvider.flavor | default "minikube" -}}
 {{- else -}}
     {{ "minikube" }}
 {{- end -}}
@@ -78,5 +78,38 @@ Returns the cloud provider docker registry url from global if exists or from the
     {{- .Values.global.cloudProvider.dockerRegistryUrl -}}
 {{- else if .Values.cloudProvider -}}
     {{- .Values.cloudProvider.dockerRegistryUrl -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the tracing url from global if exists or from the chart's values
+*/}}
+{{- define "dump-server.tracingUrl" -}}
+{{- if .Values.global.tracing.url }}
+    {{- .Values.global.tracing.url -}}
+{{- else if .Values.cloudProvider -}}
+    {{- .Values.env.tracing.url -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the metrics url from global if exists or from the chart's values
+*/}}
+{{- define "dump-server.metricsUrl" -}}
+{{- if .Values.global.metrics.url }}
+    {{- .Values.global.metrics.url -}}
+{{- else -}}
+    {{- .Values.env.metrics.url -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the metrics interval from global if exists or from the chart's values
+*/}}
+{{- define "dump-server.metricsInterval" -}}
+{{- if .Values.global.metrics.interval }}
+    {{- .Values.global.metrics.interval -}}
+{{- else -}}
+    {{- .Values.env.metrics.interval -}}
 {{- end -}}
 {{- end -}}

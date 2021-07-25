@@ -1,15 +1,15 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import { Logger } from '@map-colonies/js-logger';
+import httpLogger from '@map-colonies/express-access-log-middleware';
 import { OpenapiViewerRouter, OpenapiRouterConfig } from '@map-colonies/openapi-express-viewer';
 import { getErrorHandlerMiddleware } from '@map-colonies/error-express-handler';
 import { middleware as OpenApiMiddleware } from 'express-openapi-validator';
-import { container, inject, injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 
-import { RequestLogger } from './common/middlewares/requestLogger';
 import { Services } from './common/constants';
-import { IConfig, ILogger } from './common/interfaces';
-import { dumpMetadataRouterFactory } from './dumpMetadata/routes/dumpMetadataRouter';
+import { IConfig } from './common/interfaces';
 
 @injectable()
 export class ServerBuilder {
@@ -17,8 +17,8 @@ export class ServerBuilder {
 
   public constructor(
     @inject(Services.CONFIG) private readonly config: IConfig,
-    private readonly requestLogger: RequestLogger,
-    @inject(Services.LOGGER) private readonly logger: ILogger
+    @inject(Services.LOGGER) private readonly logger: Logger,
+    @inject('dumpsRouter') private readonly dumpsRouter: express.Router
   ) {
     this.serverInstance = express();
   }
@@ -38,11 +38,12 @@ export class ServerBuilder {
   }
 
   private buildRoutes(): void {
-    this.serverInstance.use('/dumps', dumpMetadataRouterFactory(container));
+    this.serverInstance.use('/dumps', this.dumpsRouter);
     this.buildDocsRoutes();
   }
 
   private registerPreRoutesMiddleware(): void {
+    this.serverInstance.use(httpLogger({ logger: this.logger }));
     if (this.config.get<boolean>('server.response.compression.enabled')) {
       this.serverInstance.use(compression(this.config.get<compression.CompressionFilter>('server.response.compression.options')));
     }
@@ -51,11 +52,9 @@ export class ServerBuilder {
     const ignorePathRegex = new RegExp(`^${this.config.get<string>('openapiConfig.basePath')}/.*`, 'i');
     const apiSpecPath = this.config.get<string>('openapiConfig.filePath');
     this.serverInstance.use(OpenApiMiddleware({ apiSpec: apiSpecPath, validateRequests: true, ignorePaths: ignorePathRegex }));
-
-    this.serverInstance.use(this.requestLogger.getLoggerMiddleware());
   }
 
   private registerPostRoutesMiddleware(): void {
-    this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.log('error', message)));
+    this.serverInstance.use(getErrorHandlerMiddleware((message) => this.logger.error(message)));
   }
 }

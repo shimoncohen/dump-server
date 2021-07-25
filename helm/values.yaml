@@ -1,23 +1,37 @@
 global:
   cloudProvider: {}
+  environment: {}
+  metrics: {}
+  tracing: {}
 
 environment: development
-cloudProvider:
-  name: azure
-  dockerRegistryUrl: 'some_url'
-
+replicaCount: 1
 enabled: true
-enableInternalDb: false
+initialDelaySeconds: 600
+
+cloudProvider:
+  name: openshift
+  dockerRegistryUrl: 'my-registry.io'
+
 image:
   repository: 'dump-server'
-  tag: 'v1'
-replicaCount: 1
+  tag: 'latest'
+
 env:
   port: 8080
   targetPort: 8080
   protocol: TCP
   logLevel: info
-# external
+  requestPayloadLimit: 1mb
+  responseCompressionEnabled: true
+  tracing:
+    enabled: false
+    url: 'http://localhost:55681/v1/trace'
+  metrics:
+    enabled: false
+    interval: 15000
+    url: 'http://localhost:55681/v1/metrics'
+
 dbConfig:
   host: postgresHost
   username: postgres
@@ -29,12 +43,13 @@ dbConfig:
     certFileName: name.crt
     keyFileName: name.key
     caFileName: name.crt
+
 objectStorageConfig:
   host: s3Host
   port: 9000
   protocol: http
   projectId: 373e47ef2a58d
-initialDelaySeconds: 600
+
 resources:
   enabled: false
   value:
@@ -44,13 +59,8 @@ resources:
     requests:
       cpu: 100m
       memory: 128Mi
+
 route:
   enabled: true
   enableTls: true
   path: /
-
-#internal
-postgresql:
-  postgresqlUsername: postgres
-  postgresqlPassword: postgres
-  postgresqlDatabase: postgres
