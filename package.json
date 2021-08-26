@@ -1,6 +1,6 @@
 {
   "name": "dump-server",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "A restful API for querying osm planet dumps",
   "main": "./src/index.ts",
   "scripts": {

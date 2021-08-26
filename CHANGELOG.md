@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/MapColonies/dump-server/compare/v1.1.2...v1.2.0) (2021-08-26)
+
+
+### Features
+
+* **configurations:** modified chart to match other charts in MapColonies ([#31](https://github.com/MapColonies/dump-server/issues/31)) ([bd34625](https://github.com/MapColonies/dump-server/commit/bd34625d01afc5ff1b491c812d1e9e0e8a788c3c))
+
 ### [1.1.2](https://github.com/MapColonies/dump-server/compare/v1.1.1...v1.1.2) (2021-05-25)
 
 
