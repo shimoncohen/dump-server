@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/MapColonies/dump-server/compare/v1.2.0...v2.0.0) (2022-10-26)
+
+
+### Features
+
+* **dump:** optional sequenceNumber ([#39](https://github.com/MapColonies/dump-server/issues/39)) ([e5aa8e3](https://github.com/MapColonies/dump-server/commit/e5aa8e3242e7f11f251ad90c60b71621cbf76337))
+* **dump:** removed bearer auth token on post dump endpoint ([#42](https://github.com/MapColonies/dump-server/issues/42)) ([04fe937](https://github.com/MapColonies/dump-server/commit/04fe9372d6e6ff60422be58ada73e240c81e0248))
+
+
+### Bug Fixes
+
+* **configurations:** ormconfig entities path ([#35](https://github.com/MapColonies/dump-server/issues/35)) ([387bdd7](https://github.com/MapColonies/dump-server/commit/387bdd7627577b8718d03c91a7ed6a60c4b34315))
+
 ## [1.2.0](https://github.com/MapColonies/dump-server/compare/v1.1.2...v1.2.0) (2021-08-26)
 
 
