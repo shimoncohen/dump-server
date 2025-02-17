@@ -1,9 +1,6 @@
-import { ConnectionOptions } from 'typeorm';
+import { vectorReplicaServerV1Type } from "@map-colonies/schemas";
 
-export type DbConfig = {
-  enableSslAuth: boolean;
-  sslPaths: { ca: string; cert: string; key: string };
-} & ConnectionOptions;
+export type DbCommonConfig = Pick<vectorReplicaServerV1Type, 'db'>['db'];
 
 export interface IConfig {
   get: <T>(setting: string) => T;

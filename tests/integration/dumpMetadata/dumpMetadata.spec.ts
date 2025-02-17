@@ -1,4 +1,3 @@
-import config from 'config';
 import { Connection, QueryFailedError, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import httpStatusCodes from 'http-status-codes';
@@ -23,10 +22,10 @@ import {
   createFakeDumpMetadata,
   getMockObjectStorageConfig,
 } from '../../helpers';
-import { DbConfig } from '../../../src/common/interfaces';
+import { DbCommonConfig } from '../../../src/common/interfaces';
 import { DumpMetadataFilterQueryParams } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
 import { SortFilter } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
-import { initConnection } from '../../../src/common/db';
+import { DATA_SOURCE_PROVIDER, initConnection } from '../../../src/common/db';
 import {
   BUCKET_NAME_LENGTH_LIMIT,
   BUCKET_NAME_MIN_LENGTH_LIMIT,
@@ -34,6 +33,7 @@ import {
   NAME_LENGTH_LIMIT,
   Services,
 } from '../../../src/common/constants';
+import { getConfig, initConfig } from '../../../src/common/config';
 import { DumpMetadataRequestSender } from './helpers/requestSender';
 import { BAD_PATH, BEFORE_ALL_TIMEOUT, generateDumpsMetadataOnDb, getBaseRegisterOptions, HAPPY_PATH, SAD_PATH } from './helpers';
 
@@ -46,14 +46,16 @@ describe('dumps', function () {
   let mockRequestSender: DumpMetadataRequestSender;
 
   beforeAll(async function () {
-    const connectionOptions = config.get<DbConfig>('db');
-    connection = await initConnection(connectionOptions);
+    await initConfig(true);
+    const config = getConfig();
+    const dataSourceOptions = config.get('db');
+    connection = await initConnection(dataSourceOptions);
     await connection.synchronize();
     repository = connection.getRepository(DumpMetadata);
     await repository.delete({});
 
     const registerOptions = getBaseRegisterOptions();
-    registerOptions.override.push({ token: Connection, provider: { useValue: connection } });
+    registerOptions.override.push({ token: DATA_SOURCE_PROVIDER, provider: { useValue: connection } });
     registerOptions.override.push({ token: Services.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(true) } });
 
     [container, app] = await getApp(registerOptions);

@@ -1,35 +1,52 @@
+import { hostname } from 'os';
 import { readFileSync } from 'fs';
-import { Connection, ConnectionOptions, createConnection } from 'typeorm';
+import { TlsOptions } from 'tls';
+import { DataSourceOptions, DataSource } from 'typeorm';
 import { HealthCheck } from '@godaddy/terminus';
-import { DependencyContainer, FactoryFunction } from 'tsyringe';
-import { IConfig } from '../../common/interfaces';
-import { DbConfig } from '../interfaces';
+import { FactoryFunction } from 'tsyringe';
+import { DbCommonConfig } from '../interfaces';
 import { DumpMetadata } from '../../dumpMetadata/DAL/typeorm/dumpMetadata';
 import { promiseTimeout } from '../utils/promiseTimeout';
-import { DB_HEALTHCHECK_TIMEOUT_MS, Services } from '../constants';
+import { DB_HEALTHCHECK_TIMEOUT_MS } from '../constants';
+import { getConfig } from '../config';
 
-let connectionSingleton: Connection | undefined;
+let connectionSingleton: DataSource | undefined;
 
 export const ENTITIES_DIRS = [DumpMetadata, 'src/dumpMetadata/models/DumpMetadata.ts'];
+export const DATA_SOURCE_PROVIDER = Symbol('dataSourceProvider');
 
-export const createConnectionOptions = (dbConfig: DbConfig): ConnectionOptions => {
-  const { enableSslAuth, sslPaths, ...connectionOptions } = dbConfig;
-  if (enableSslAuth && connectionOptions.type === 'postgres') {
-    connectionOptions.password = undefined;
-    connectionOptions.ssl = { key: readFileSync(sslPaths.key), cert: readFileSync(sslPaths.cert), ca: readFileSync(sslPaths.ca) };
+/**
+ * A helper function that creates the typeorm DataSource options to use for creating a new DataSource.
+ * Handles SSL and registration of all required entities and migrations.
+ * @param dbConfig The typeorm postgres configuration with added SSL options.
+ * @returns Options object ready to use with typeorm.
+ */
+export const createConnectionOptions = (dbConfig: DbCommonConfig): DataSourceOptions => {
+  let ssl: TlsOptions | undefined = undefined;
+  const { ssl: inputSsl, ...dataSourceOptions } = dbConfig;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  //dataSourceOptions.extra = { application_name: `${hostname()}-${process.env.NODE_ENV ?? 'unknown_env'}` };
+  if (inputSsl.enabled) {
+    ssl = { key: readFileSync(inputSsl.key), cert: readFileSync(inputSsl.cert), ca: readFileSync(inputSsl.ca) };
   }
-  return connectionOptions;
+  return {
+    ...dataSourceOptions,
+    type: 'postgres',
+    entities: [...ENTITIES_DIRS, '**/models/*.js'],
+    ssl,
+    applicationName: `${hostname()}-${process.env.NODE_ENV ?? 'unknown_env'}`,
+  };
 };
 
-export const initConnection = async (dbConfig: DbConfig): Promise<Connection> => {
-  if (connectionSingleton === undefined || !connectionSingleton.isConnected) {
-    const connectionOptions = createConnectionOptions({ entities: ENTITIES_DIRS, ...dbConfig });
-    connectionSingleton = await createConnection(connectionOptions);
+export const initConnection = async (dbConfig: DbCommonConfig): Promise<DataSource> => {
+  if (connectionSingleton === undefined || !connectionSingleton.isInitialized) {
+    connectionSingleton = new DataSource(createConnectionOptions(dbConfig));
+    await connectionSingleton.initialize();
   }
   return connectionSingleton;
 };
 
-export const getDbHealthCheckFunction = (connection: Connection): HealthCheck => {
+export const getDbHealthCheckFunction = (connection: DataSource): HealthCheck => {
   return async (): Promise<void> => {
     const check = connection.query('SELECT 1').then(() => {
       return;
@@ -38,9 +55,10 @@ export const getDbHealthCheckFunction = (connection: Connection): HealthCheck =>
   };
 };
 
-export const connectionFactory: FactoryFunction<Connection> = (container: DependencyContainer): Connection => {
-  const config = container.resolve<IConfig>(Services.CONFIG);
-  const dbConfig = config.get<DbConfig>('db');
-  const connectionOptions = createConnectionOptions({ entities: ENTITIES_DIRS, ...dbConfig });
-  return new Connection(connectionOptions);
+export const dataSourceFactory: FactoryFunction<DataSource> = (): DataSource => {
+  const config = getConfig();
+  const dbConfig = config.get('db');
+
+  const dataSourceOptions = createConnectionOptions(dbConfig);
+  return new DataSource(dataSourceOptions);
 };
