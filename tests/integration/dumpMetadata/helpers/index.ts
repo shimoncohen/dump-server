@@ -4,7 +4,7 @@ import { trace } from '@opentelemetry/api';
 import { DumpMetadata } from '../../../../src/dumpMetadata/DAL/typeorm/dumpMetadata';
 import { createMultipleFakeDumpsMetadata } from '../../../helpers';
 import { RegisterOptions } from '../../../../src/containerConfig';
-import { Services } from '../../../../src/common/constants';
+import { SERVICES } from '../../../../src/common/constants';
 
 export const HAPPY_PATH = 'Happy Path 🙂';
 export const SAD_PATH = 'Sad Path 😥';
@@ -20,8 +20,8 @@ export const generateDumpsMetadataOnDb = async (repository: Repository<DumpMetad
 export const getBaseRegisterOptions = (): Required<RegisterOptions> => {
   return {
     override: [
-      { token: Services.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
-      { token: Services.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
+      { token: SERVICES.LOGGER, provider: { useValue: jsLogger({ enabled: false }) } },
+      { token: SERVICES.TRACER, provider: { useValue: trace.getTracer('testTracer') } },
     ],
     useChild: true,
   };

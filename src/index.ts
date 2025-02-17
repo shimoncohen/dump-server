@@ -6,7 +6,7 @@ import { DependencyContainer } from 'tsyringe';
 import { Logger } from '@map-colonies/js-logger';
 import { createTerminus, HealthCheck } from '@godaddy/terminus';
 import { getApp } from './app';
-import { DEFAULT_SERVER_PORT, Services } from './common/constants';
+import { DEFAULT_SERVER_PORT, SERVICES } from './common/constants';
 import { ShutdownHandler } from './common/shutdownHandler';
 import { ConfigType } from './common/config';
 
@@ -30,8 +30,8 @@ void getApp()
   })
   .catch(async (error: Error) => {
     const errorLogger =
-      depContainer?.isRegistered(Services.LOGGER) == true
-        ? depContainer.resolve<Logger>(Services.LOGGER).error.bind(depContainer.resolve<Logger>(Services.LOGGER))
+      depContainer?.isRegistered(SERVICES.LOGGER) == true
+        ? depContainer.resolve<Logger>(SERVICES.LOGGER).error.bind(depContainer.resolve<Logger>(SERVICES.LOGGER))
         : console.error;
     errorLogger({ msg: '😢 - failed initializing the server', err: error });
 

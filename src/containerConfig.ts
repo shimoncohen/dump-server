@@ -7,7 +7,7 @@ import { metrics } from '@opentelemetry/api-metrics';
 import { dumpMetadataRouterFactory, DUMP_METADATA_ROUTER_SYMBOL } from './dumpMetadata/routes/dumpMetadataRouter';
 import { tracing } from './common/tracing';
 import { InjectionObject, registerDependencies } from './common/dependencyRegistration';
-import { Services } from './common/constants';
+import { SERVICES } from './common/constants';
 import { DATA_SOURCE_PROVIDER, dataSourceFactory, getDbHealthCheckFunction } from './common/db';
 import { ShutdownHandler } from './common/shutdownHandler';
 import { DumpMetadata, DUMP_METADATA_REPOSITORY_SYMBOL } from './dumpMetadata/DAL/typeorm/dumpMetadata';
@@ -35,11 +35,11 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
     const objectStorageConfig = configInstance.get('objectStorage');
 
     const dependencies: InjectionObject<unknown>[] = [
-      { token: Services.CONFIG, provider: { useValue: configInstance } },
-      { token: Services.LOGGER, provider: { useValue: logger } },
-      { token: Services.TRACER, provider: { useValue: tracer } },
-      { token: Services.METER, provider: { useValue: metrics.getMeter('app') } },
-      { token: Services.OBJECT_STORAGE, provider: { useValue: objectStorageConfig } },
+      { token: SERVICES.CONFIG, provider: { useValue: configInstance } },
+      { token: SERVICES.LOGGER, provider: { useValue: logger } },
+      { token: SERVICES.TRACER, provider: { useValue: tracer } },
+      { token: SERVICES.METRICS, provider: { useValue: metrics.getMeter('app') } },
+      { token: SERVICES.OBJECT_STORAGE, provider: { useValue: objectStorageConfig } },
       {
         token: DATA_SOURCE_PROVIDER,
         provider: { useFactory: instancePerContainerCachingFactory(dataSourceFactory) },
@@ -61,7 +61,7 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
       },
       { token: DUMP_METADATA_ROUTER_SYMBOL, provider: { useFactory: dumpMetadataRouterFactory } },
       {
-        token: 'healthcheck',
+        token: SERVICES.HEALTHCHECK,
         provider: { useFactory: (container): unknown => getDbHealthCheckFunction(container.resolve<DataSource>(DataSource)) },
       },
       {

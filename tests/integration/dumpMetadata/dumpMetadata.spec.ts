@@ -1,4 +1,4 @@
-import { Connection, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, QueryFailedError, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import httpStatusCodes from 'http-status-codes';
 import { Application } from 'express';
@@ -22,7 +22,6 @@ import {
   createFakeDumpMetadata,
   getMockObjectStorageConfig,
 } from '../../helpers';
-import { DbCommonConfig } from '../../../src/common/interfaces';
 import { DumpMetadataFilterQueryParams } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
 import { SortFilter } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
 import { DATA_SOURCE_PROVIDER, initConnection } from '../../../src/common/db';
@@ -31,7 +30,7 @@ import {
   BUCKET_NAME_MIN_LENGTH_LIMIT,
   DESCRIPTION_LENGTH_LIMIT,
   NAME_LENGTH_LIMIT,
-  Services,
+  SERVICES,
 } from '../../../src/common/constants';
 import { getConfig, initConfig } from '../../../src/common/config';
 import { DumpMetadataRequestSender } from './helpers/requestSender';
@@ -40,7 +39,7 @@ import { BAD_PATH, BEFORE_ALL_TIMEOUT, generateDumpsMetadataOnDb, getBaseRegiste
 describe('dumps', function () {
   let container: DependencyContainer;
   let app: Application;
-  let connection: Connection;
+  let connection: DataSource;
   let repository: Repository<DumpMetadata>;
   let requestSender: DumpMetadataRequestSender;
   let mockRequestSender: DumpMetadataRequestSender;
@@ -56,7 +55,7 @@ describe('dumps', function () {
 
     const registerOptions = getBaseRegisterOptions();
     registerOptions.override.push({ token: DATA_SOURCE_PROVIDER, provider: { useValue: connection } });
-    registerOptions.override.push({ token: Services.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(true) } });
+    registerOptions.override.push({ token: SERVICES.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(true) } });
 
     [container, app] = await getApp(registerOptions);
     requestSender = new DumpMetadataRequestSender(app);
@@ -277,7 +276,7 @@ describe('dumps', function () {
         const integrationDumpMetadata = convertToISOTimestamp(dumpResponse);
 
         const mockRegisterOptions = getBaseRegisterOptions();
-        mockRegisterOptions.override.push({ token: Services.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(false) } });
+        mockRegisterOptions.override.push({ token: SERVICES.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(false) } });
         const [, mockApp] = await getApp(mockRegisterOptions);
         mockRequestSender = new DumpMetadataRequestSender(mockApp);
         const response = await mockRequestSender.getDumpMetadataById(fakeDumpMetadata.id);

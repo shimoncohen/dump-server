@@ -2,7 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { FindManyOptions, Repository } from 'typeorm';
 import { Logger } from '@map-colonies/js-logger';
 import { omitBy, isNil } from 'lodash';
-import { Services } from '../../common/constants';
+import { SERVICES } from '../../common/constants';
 import { IObjectStorageConfig } from '../../common/interfaces';
 import { isStringUndefinedOrEmpty } from '../../common/utils';
 import { DumpNameAlreadyExistsError } from '../../common/errors';
@@ -18,8 +18,8 @@ export class DumpMetadataManager {
 
   public constructor(
     @inject(DUMP_METADATA_REPOSITORY_SYMBOL) private readonly repository: Repository<DumpMetadata>,
-    @inject(Services.LOGGER) private readonly logger: Logger,
-    @inject(Services.OBJECT_STORAGE) private readonly objectStorageConfig: IObjectStorageConfig
+    @inject(SERVICES.LOGGER) private readonly logger: Logger,
+    @inject(SERVICES.OBJECT_STORAGE) private readonly objectStorageConfig: IObjectStorageConfig
   ) {
     this.urlHeader = this.getUrlHeader();
     if (!isStringUndefinedOrEmpty(this.objectStorageConfig.projectId)) {

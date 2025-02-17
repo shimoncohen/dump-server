@@ -1,4 +1,4 @@
-import { vectorReplicaServerV1Type } from "@map-colonies/schemas";
+import { vectorReplicaServerV1Type } from '@map-colonies/schemas';
 
 export type DbCommonConfig = Pick<vectorReplicaServerV1Type, 'db'>['db'];
 
