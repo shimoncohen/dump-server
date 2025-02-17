@@ -212,7 +212,7 @@ describe('dumps', function () {
         const response = await requestSender.getDumpsMetadataByFilter(filter);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', 'request.query.sort should be equal to one of the allowed values: asc, desc');
+        expect(response.body).toHaveProperty('message', 'request/query/sort must be equal to one of the allowed values: asc, desc');
       });
 
       it('should return 400 status code for an invalid limit lower than 1', async function () {
@@ -221,7 +221,7 @@ describe('dumps', function () {
         const response = await requestSender.getDumpsMetadataByFilter(filter);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', 'request.query.limit should be >= 1');
+        expect(response.body).toHaveProperty('message', 'request/query/limit must be >= 1');
       });
 
       it('should return 400 status code for an invalid limit greater than 100', async function () {
@@ -230,7 +230,7 @@ describe('dumps', function () {
         const response = await requestSender.getDumpsMetadataByFilter(filter);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', 'request.query.limit should be <= 100');
+        expect(response.body).toHaveProperty('message', 'request/query/limit must be <= 100');
       });
     });
 
@@ -291,7 +291,7 @@ describe('dumps', function () {
         const response = await requestSender.getDumpMetadataById(faker.random.word());
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', 'request.params.dumpId should match format "uuid"');
+        expect(response.body).toHaveProperty('message', 'request/params/dumpId must match format "uuid"');
       });
     });
 
@@ -305,12 +305,12 @@ describe('dumps', function () {
 
       it('should return 500 status code if a database exception occurs', async function () {
         const errorMessage = 'An error occurred';
-        const findOneMock = jest.fn().mockRejectedValue(new QueryFailedError('', undefined, new Error(errorMessage)));
+        const findOneByMock = jest.fn().mockRejectedValue(new QueryFailedError('', undefined, new Error(errorMessage)));
 
         const mockRegisterOptions = getBaseRegisterOptions();
         mockRegisterOptions.override.push({
           token: DUMP_METADATA_REPOSITORY_SYMBOL,
-          provider: { useValue: { findOne: findOneMock } },
+          provider: { useValue: { findOneBy: findOneByMock } },
         });
 
         const [, mockApp] = await getApp(mockRegisterOptions);
@@ -342,7 +342,7 @@ describe('dumps', function () {
         const response = await requestSender.createDump({ ...dumpCreationBody } as DumpMetadataCreation);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', "request.body should have required property 'name'");
+        expect(response.body).toHaveProperty('message', "request/body must have required property 'name'");
       });
 
       it('should return 400 status code if the bucket is missing', async function () {
@@ -351,7 +351,7 @@ describe('dumps', function () {
         const response = await requestSender.createDump({ ...dumpCreationBody } as DumpMetadataCreation);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', "request.body should have required property 'bucket'");
+        expect(response.body).toHaveProperty('message', "request/body must have required property 'bucket'");
       });
 
       it('should return 400 status code if the timestamp is missing', async function () {
@@ -360,7 +360,7 @@ describe('dumps', function () {
         const response = await requestSender.createDump({ ...dumpCreationBody } as DumpMetadataCreation);
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', "request.body should have required property 'timestamp'");
+        expect(response.body).toHaveProperty('message', "request/body must have required property 'timestamp'");
       });
 
       it('should return 400 status code if the timestamp is not in a utc format', async function () {
@@ -370,7 +370,7 @@ describe('dumps', function () {
         const response = await requestSender.createDump({ ...dumpCreationBody, timestamp: faker.random.word() as unknown as Date });
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', 'request.body.timestamp should match format "date-time"');
+        expect(response.body).toHaveProperty('message', 'request/body/timestamp must match format "date-time"');
       });
 
       it(`should return 400 status code if the name is longer than ${NAME_LENGTH_LIMIT} characters`, async function () {
@@ -380,7 +380,7 @@ describe('dumps', function () {
         const response = await requestSender.createDump({ ...dumpCreationBody, name: faker.random.alpha({ count: NAME_LENGTH_LIMIT + 1 }) });
 
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', `request.body.name should NOT be longer than ${NAME_LENGTH_LIMIT} characters`);
+        expect(response.body).toHaveProperty('message', `request/body/name must NOT have more than ${NAME_LENGTH_LIMIT} characters`);
       });
 
       it(`should return 400 status code if the bucket is longer than ${BUCKET_NAME_LENGTH_LIMIT} characters`, async function () {
@@ -392,7 +392,7 @@ describe('dumps', function () {
           bucket: faker.random.alpha({ count: BUCKET_NAME_LENGTH_LIMIT + 1 }),
         });
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', `request.body.bucket should NOT be longer than ${BUCKET_NAME_LENGTH_LIMIT} characters`);
+        expect(response.body).toHaveProperty('message', `request/body/bucket must NOT have more than ${BUCKET_NAME_LENGTH_LIMIT} characters`);
       });
 
       it(`should return 400 status code if the bucket is shorter than ${BUCKET_NAME_MIN_LENGTH_LIMIT} characters`, async function () {
@@ -401,7 +401,7 @@ describe('dumps', function () {
 
         const response = await requestSender.createDump({ ...dumpCreationBody, bucket: faker.lorem.word(BUCKET_NAME_MIN_LENGTH_LIMIT - 1) });
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', `request.body.bucket should NOT be shorter than ${BUCKET_NAME_MIN_LENGTH_LIMIT} characters`);
+        expect(response.body).toHaveProperty('message', `request/body/bucket must NOT have fewer than ${BUCKET_NAME_MIN_LENGTH_LIMIT} characters`);
       });
 
       it(`should return 400 status code if the description is longer than ${DESCRIPTION_LENGTH_LIMIT} characters`, async function () {
@@ -413,7 +413,7 @@ describe('dumps', function () {
           description: faker.random.alpha({ count: DESCRIPTION_LENGTH_LIMIT + 1 }),
         });
         expect(response.status).toBe(httpStatusCodes.BAD_REQUEST);
-        expect(response.body).toHaveProperty('message', `request.body.description should NOT be longer than ${DESCRIPTION_LENGTH_LIMIT} characters`);
+        expect(response.body).toHaveProperty('message', `request/body/description must NOT have more than ${DESCRIPTION_LENGTH_LIMIT} characters`);
       });
 
       it('should return 422 status code if a dump with the same name already exists on the bucket', async function () {

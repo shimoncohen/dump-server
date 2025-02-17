@@ -1,9 +1,10 @@
 import * as supertest from 'supertest';
+import { Application } from 'express';
 import { DumpMetadataFilterQueryParams } from '../../../../src/dumpMetadata/models/dumpMetadataFilter';
 import { DumpMetadataCreation } from '../../../../src/dumpMetadata/models/dumpMetadata';
 
 export class DumpMetadataRequestSender {
-  public constructor(private readonly app: Express.Application) {}
+  public constructor(private readonly app: Application) {}
 
   public async getDumpsMetadataByFilter(filter: DumpMetadataFilterQueryParams | Record<string, never>): Promise<supertest.Response> {
     return supertest.agent(this.app).get(`/dumps`).query(filter).set('Content-Type', 'application/json').accept('application/json');
