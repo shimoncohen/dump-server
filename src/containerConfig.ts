@@ -3,15 +3,15 @@ import { DataSource, Repository } from 'typeorm';
 import { trace } from '@opentelemetry/api';
 import { getOtelMixin, Metrics } from '@map-colonies/telemetry';
 import jsLogger from '@map-colonies/js-logger';
-import { metrics } from '@opentelemetry/api-metrics';
+import { Registry } from 'prom-client';
 import { dumpMetadataRouterFactory, DUMP_METADATA_ROUTER_SYMBOL } from './dumpMetadata/routes/dumpMetadataRouter';
-import { tracing } from './common/tracing';
 import { InjectionObject, registerDependencies } from './common/dependencyRegistration';
-import { SERVICES } from './common/constants';
+import { SERVICE_NAME, SERVICES } from './common/constants';
 import { DATA_SOURCE_PROVIDER, dataSourceFactory, getDbHealthCheckFunction } from './common/db';
 import { ShutdownHandler } from './common/shutdownHandler';
 import { DumpMetadata, DUMP_METADATA_REPOSITORY_SYMBOL } from './dumpMetadata/DAL/typeorm/dumpMetadata';
 import { getConfig } from './common/config';
+import { getTracing } from './common/tracing';
 
 export interface RegisterOptions {
   override?: InjectionObject<unknown>[];
@@ -30,7 +30,8 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
     const otelMetrics = new Metrics();
     otelMetrics.start();
 
-    const tracer = trace.getTracer('app');
+    const tracer = trace.getTracer(SERVICE_NAME);
+    const metricsRegistry = new Registry();
 
     const objectStorageConfig = configInstance.get('objectStorage');
 
@@ -38,7 +39,7 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
       { token: SERVICES.CONFIG, provider: { useValue: configInstance } },
       { token: SERVICES.LOGGER, provider: { useValue: logger } },
       { token: SERVICES.TRACER, provider: { useValue: tracer } },
-      { token: SERVICES.METRICS, provider: { useValue: metrics.getMeter('app') } },
+      { token: SERVICES.METRICS, provider: { useValue: metricsRegistry } },
       { token: SERVICES.OBJECT_STORAGE, provider: { useValue: objectStorageConfig } },
       {
         token: DATA_SOURCE_PROVIDER,
@@ -69,7 +70,7 @@ export const registerExternalValues = async (options?: RegisterOptions): Promise
         provider: {
           useValue: {
             useValue: async (): Promise<void> => {
-              await Promise.all([tracing.stop(), otelMetrics.stop(), shutdownHandler.onShutdown()]);
+              await Promise.all([getTracing().stop(), otelMetrics.stop(), shutdownHandler.onShutdown()]);
             },
           },
         },
