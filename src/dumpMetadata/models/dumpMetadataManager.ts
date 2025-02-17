@@ -30,7 +30,7 @@ export class DumpMetadataManager {
   public async getDumpMetadataById(id: string): Promise<DumpMetadataResponse> {
     this.logger.info({ msg: 'getting dump metadata by id', id });
 
-    const dumpMetadata = await this.repository.findOne(id);
+    const dumpMetadata = await this.repository.findOneBy({ id });
     if (!dumpMetadata) {
       this.logger.error({ msg: 'could not find dump metadata by id', id });
       throw new DumpNotFoundError("Couldn't find dump with the given id.");
