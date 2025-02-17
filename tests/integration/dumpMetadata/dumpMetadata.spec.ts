@@ -66,7 +66,7 @@ describe('dumps', function () {
   });
 
   afterAll(async function () {
-    await connection.close();
+    await connection.destroy();
     container.reset();
   });
   describe('GET /dumps', function () {
