@@ -23,16 +23,18 @@ let dumpMetadataManager: DumpMetadataManager;
 
 describe('dumpMetadataManager', () => {
   let find: jest.Mock;
+  let findOneBy: jest.Mock;
   let findOne: jest.Mock;
   let insert: jest.Mock;
   let repository: Repository<DumpMetadata>;
 
   beforeEach(function () {
     find = jest.fn();
+    findOneBy = jest.fn();
     findOne = jest.fn();
     insert = jest.fn();
 
-    repository = { find, findOne, insert } as unknown as Repository<DumpMetadata>;
+    repository = { find, findOneBy, findOne, insert } as unknown as Repository<DumpMetadata>;
     dumpMetadataManager = new DumpMetadataManager(repository, jsLogger({ enabled: false }), getMockObjectStorageConfig(true));
   });
 
@@ -104,7 +106,7 @@ describe('dumpMetadataManager', () => {
   describe('#getDumpMetadataById', () => {
     it('should return the dumpMetadata', async function () {
       const dumpMetadata = createFakeDumpMetadata();
-      findOne.mockResolvedValue(dumpMetadata);
+      findOneBy.mockResolvedValue(dumpMetadata);
 
       const getPromise = dumpMetadataManager.getDumpMetadataById(dumpMetadata.id);
 
@@ -115,7 +117,7 @@ describe('dumpMetadataManager', () => {
 
     it('should return the dumpMetadata without projectId', async function () {
       const dumpMetadata = createFakeDumpMetadata();
-      findOne.mockResolvedValue(dumpMetadata);
+      findOneBy.mockResolvedValue(dumpMetadata);
 
       const dumpMetadataManagerWithoutProjectId = new DumpMetadataManager(
         repository,
@@ -130,7 +132,7 @@ describe('dumpMetadataManager', () => {
     });
 
     it('should throw DumpNotFoundError if dumpMetadata with the given id was not found', async () => {
-      findOne.mockReturnValue(undefined);
+      findOneBy.mockReturnValue(undefined);
       const dumpMetadata = createFakeDumpMetadata();
 
       const getPromise = dumpMetadataManager.getDumpMetadataById(dumpMetadata.id);
@@ -139,7 +141,7 @@ describe('dumpMetadataManager', () => {
     });
 
     it('should reject on DB error', async () => {
-      findOne.mockRejectedValue(new QueryFailedError('', undefined, new Error()));
+      findOneBy.mockRejectedValue(new QueryFailedError('', undefined, new Error()));
 
       const getPromise = dumpMetadataManager.getDumpMetadataById(faker.datatype.uuid());
 
