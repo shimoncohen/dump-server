@@ -1,6 +1,14 @@
 name: pull_request
 
-on: [pull_request]
+on: [ pull_request ]
+
+env:
+  DB_HOST: localhost
+  DB_PORT: 5432
+  DB_NAME: postgres
+  DB_USERNAME: postgres
+  DB_PASSWORD: postgres
+  DB_SCHEMA: dump_server
 
 jobs:
   eslint:
@@ -8,31 +16,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
+    - name: Check out Git repository
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
+    - name: Set up Node.js
+      uses: ./.github/actions/init-npm
+      with:
+        node-version: ${{ matrix.node }}
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install dependencies
+      run: npm ci
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          # Enable linters
-          eslint: true
-          prettier: true
-          eslint_extensions: ts
+    - name: Run linters
+      uses: wearerequired/lint-action@v2
+      with:
+        github_token: ${{ secrets.github_token }}
+        # Enable linters
+        eslint: true
+        prettier: true
+        eslint_extensions: ts
 
-      - name: OpenAPI Lint Checks
-        uses: nwestfall/openapi-action@v1.0.2
-        with:
-         github_token: ${{ secrets.GITHUB_TOKEN }}
-         file: ./openapi3.yaml
+    - name: OpenAPI Lint Checks
+      uses: nwestfall/openapi-action@v1.0.2
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./openapi3.yaml
 
   security:
     runs-on: ubuntu-latest
@@ -47,7 +55,10 @@ jobs:
   tests:
     name: Run Tests
     runs-on: ubuntu-latest
-    container: node:16
+
+    strategy:
+      matrix:
+        node: [ 20.x, 22.x ]
 
     services:
       # Label used to access the service container
@@ -56,36 +67,29 @@ jobs:
         image: postgres:12
         # Provide the password for postgres
         env:
-          POSTGRES_PASSWORD: 1234
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD}}
+          POSTGRES_USER: ${{ env.DB_USERNAME }}
+          POSTGRES_DB: ${{ env.DB_NAME }}
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    strategy:
-      matrix:
-        node: [14.x, 16.x]
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
+    - name: Check out Git repository
+      uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
+    - name: Set up Node.js
+      uses: ./.github/actions/init-npm
+      with:
+        node-version: ${{ matrix.node }}
 
-      - name: Install Node.js dependencies
-        run: npm ci
+    - name: Install Node.js dependencies
+      run: npm ci
 
-      - name: Run tests
-        run: npm run test
+    - name: Run tests
+      run: npm run test
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: Test Reporters
-          path: reports/**
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Test Reporters Node-${{ matrix.node }}
+        path: reports/**
