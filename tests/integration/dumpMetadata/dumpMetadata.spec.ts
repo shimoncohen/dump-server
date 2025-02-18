@@ -43,7 +43,7 @@ describe('dumps', function () {
   let repository: Repository<DumpMetadata>;
   let requestSender: DumpMetadataRequestSender;
   let mockRequestSender: DumpMetadataRequestSender;
-
+try{
   beforeAll(async function () {
     await initConfig(true);
     const config = getConfig();
@@ -68,6 +68,13 @@ describe('dumps', function () {
     await connection.destroy();
     container.reset();
   });
+} catch (err){
+  if (err instanceof AggregateError) {
+    err.errors.forEach(e => console.error('Connection error:', e));
+  } else {
+    console.error('Unexpected error:', err);
+  }
+}
   describe('GET /dumps', function () {
     describe(`${HAPPY_PATH}`, function () {
       it('should return 200 status code and the dumps queried by the default filter with given empty filter', async function () {
@@ -84,7 +91,7 @@ describe('dumps', function () {
         expect(response.body).toMatchObject(sortByOrderFilter(integrationDumpsMetadata, DEFAULT_SORT).slice(0, DEFAULT_LIMIT));
       });
 
-      it.only('should return 200 status code and the dumps queried by filter', async function () {
+      it('should return 200 status code and the dumps queried by filter', async function () {
         const from = createFakeDate();
         const to = faker.date.between(from, TOP_TO);
         const filter: DumpMetadataFilterQueryParams = { limit: DEFAULT_LIMIT, sort: 'asc', from: from.toISOString(), to: to.toISOString() };
