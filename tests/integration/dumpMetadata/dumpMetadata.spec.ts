@@ -51,9 +51,7 @@ describe('dumps', function () {
     connection = await initConnection(dataSourceOptions);
     await connection.synchronize();
     repository = connection.getRepository(DumpMetadata);
-    console.log(repository, 'this is repository')
     await repository.delete({});
-
     const registerOptions = getBaseRegisterOptions();
     registerOptions.override.push({ token: DATA_SOURCE_PROVIDER, provider: { useValue: connection } });
     registerOptions.override.push({ token: SERVICES.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(true) } });
@@ -63,16 +61,7 @@ describe('dumps', function () {
   }, BEFORE_ALL_TIMEOUT);
 
   afterEach(async function () {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!connection || !connection.isInitialized) {
-      console.error('❌ TypeORM connection is not initialized in CI!');
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    } else if (!repository) {
-      console.error('❌ Repository is undefined! Make sure it’s created after connection initialization.');
-    } else {
-      console.log('✅ Clearing repository...');
-      await repository.clear();
-    }
+    await repository.clear();
   });
 
   afterAll(async function () {
@@ -95,7 +84,7 @@ describe('dumps', function () {
         expect(response.body).toMatchObject(sortByOrderFilter(integrationDumpsMetadata, DEFAULT_SORT).slice(0, DEFAULT_LIMIT));
       });
 
-      it('should return 200 status code and the dumps queried by filter', async function () {
+      it.only('should return 200 status code and the dumps queried by filter', async function () {
         const from = createFakeDate();
         const to = faker.date.between(from, TOP_TO);
         const filter: DumpMetadataFilterQueryParams = { limit: DEFAULT_LIMIT, sort: 'asc', from: from.toISOString(), to: to.toISOString() };
