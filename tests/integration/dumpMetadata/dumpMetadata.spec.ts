@@ -36,6 +36,7 @@ import { getConfig, initConfig } from '../../../src/common/config';
 import { DumpMetadataRequestSender } from './helpers/requestSender';
 import { BAD_PATH, BEFORE_ALL_TIMEOUT, generateDumpsMetadataOnDb, getBaseRegisterOptions, HAPPY_PATH, SAD_PATH } from './helpers';
 
+try{
 describe('dumps', function () {
   let container: DependencyContainer;
   let app: Application;
@@ -43,7 +44,7 @@ describe('dumps', function () {
   let repository: Repository<DumpMetadata>;
   let requestSender: DumpMetadataRequestSender;
   let mockRequestSender: DumpMetadataRequestSender;
-try{
+
   beforeAll(async function () {
     await initConfig(true);
     const config = getConfig();
@@ -68,13 +69,7 @@ try{
     await connection.destroy();
     container.reset();
   });
-} catch (err){
-  if (err instanceof AggregateError) {
-    err.errors.forEach(e => console.error('Connection error:', e));
-  } else {
-    console.error('Unexpected error:', err);
-  }
-}
+
   describe('GET /dumps', function () {
     describe(`${HAPPY_PATH}`, function () {
       it('should return 200 status code and the dumps queried by the default filter with given empty filter', async function () {
@@ -456,4 +451,11 @@ try{
       });
     });
   });
-});
+})
+} catch (err){
+  if (err instanceof AggregateError) {
+    err.errors.forEach(e => console.error('Connection error:', e));
+  } else {
+    console.error('Unexpected error:', err);
+  }
+}
