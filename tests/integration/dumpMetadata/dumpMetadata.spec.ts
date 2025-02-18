@@ -36,7 +36,6 @@ import { getConfig, initConfig } from '../../../src/common/config';
 import { DumpMetadataRequestSender } from './helpers/requestSender';
 import { BAD_PATH, BEFORE_ALL_TIMEOUT, generateDumpsMetadataOnDb, getBaseRegisterOptions, HAPPY_PATH, SAD_PATH } from './helpers';
 
-try{
 describe('dumps', function () {
   let container: DependencyContainer;
   let app: Application;
@@ -451,13 +450,4 @@ describe('dumps', function () {
       });
     });
   });
-})
-} catch (err){
-  console.log('error type is', typeof(err));
-  console.log('error is: ' ,err)
-  if (err instanceof AggregateError) {
-    err.errors.forEach(e => console.error('Connection error:', e));
-  } else {
-    console.error('Unexpected error:', err);
-  }
-}
+});
