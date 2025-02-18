@@ -58,7 +58,7 @@ jobs:
 
     strategy:
       matrix:
-        node: [ 20.x ]
+        node: [ 20.x, 22.x ]
 
     services:
       # Label used to access the service container
@@ -87,6 +87,21 @@ jobs:
 
     - name: Install Node.js dependencies
       run: npm ci
+
+    - name: Install pg client
+      run: |
+        sudo apt-get update && sudo apt-get install -y lsb-release
+        echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/keyrings/postgresql-keyring.asc > /dev/null
+        echo "deb [signed-by=/usr/share/keyrings/postgresql-keyring.asc] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list > /dev/null
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+      shell: bash
+
+    - name: Create schema
+      run: psql -h $DB_HOST -d $DB_NAME -U $DB_USERNAME -c 'CREATE SCHEMA dump_server;'
+      env:
+        PGPASSWORD: ${{ env.DB_PASSWORD }}
 
     - name: Run tests
       run: npm run test
