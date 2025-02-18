@@ -51,6 +51,7 @@ describe('dumps', function () {
     connection = await initConnection(dataSourceOptions);
     await connection.synchronize();
     repository = connection.getRepository(DumpMetadata);
+    console.log(repository, 'this is repository')
     await repository.delete({});
 
     const registerOptions = getBaseRegisterOptions();
@@ -62,7 +63,16 @@ describe('dumps', function () {
   }, BEFORE_ALL_TIMEOUT);
 
   afterEach(async function () {
-    await repository.clear();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!connection || !connection.isInitialized) {
+      console.error('❌ TypeORM connection is not initialized in CI!');
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } else if (!repository) {
+      console.error('❌ Repository is undefined! Make sure it’s created after connection initialization.');
+    } else {
+      console.log('✅ Clearing repository...');
+      await repository.clear();
+    }
   });
 
   afterAll(async function () {
