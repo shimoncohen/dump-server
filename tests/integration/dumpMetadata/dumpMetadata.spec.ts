@@ -453,6 +453,8 @@ describe('dumps', function () {
   });
 })
 } catch (err){
+  console.log('error type is', typeof(err));
+  console.log('error is: ' ,err)
   if (err instanceof AggregateError) {
     err.errors.forEach(e => console.error('Connection error:', e));
   } else {
