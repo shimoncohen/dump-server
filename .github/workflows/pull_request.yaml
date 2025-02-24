@@ -107,7 +107,7 @@ jobs:
           PGPASSWORD: ${{ env.DB_PASSWORD }}
 
       - name: Create extension
-        run: psql -h $DB_HOST -d $DB_NAME -U $DB_USERNAME -c 'CREATE EXTENSION IF NOT EXISTS uuid-ossp;'
+        run: psql -h $DB_HOST -d $DB_NAME -U $DB_USERNAME -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
         env:
           PGPASSWORD: ${{ env.DB_PASSWORD }}
 
