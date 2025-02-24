@@ -13,7 +13,6 @@ import { getConfig } from '../config';
 let connectionSingleton: DataSource | undefined;
 
 export const ENTITIES_DIRS = [DumpMetadata, 'src/dumpMetadata/models/DumpMetadata.ts'];
-export const DATA_SOURCE_PROVIDER = Symbol('dataSourceProvider');
 
 /**
  * A helper function that creates the typeorm DataSource options to use for creating a new DataSource.

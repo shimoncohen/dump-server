@@ -19,6 +19,8 @@ export const SERVICES = {
 } satisfies Record<string, symbol>;
 /* eslint-enable @typescript-eslint/naming-convention */
 
+export const DATA_SOURCE_PROVIDER = Symbol('dataSourceProvider');
+
 export const ON_SIGNAL = Symbol('onSignal');
 
 export const DB_TIMEOUT = 5000;
