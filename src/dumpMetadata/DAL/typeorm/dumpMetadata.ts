@@ -7,17 +7,17 @@ export class DumpMetadata implements IDumpMetadata {
   @PrimaryGeneratedColumn('uuid')
   public readonly id!: string;
 
-  @Column({ length: NAME_LENGTH_LIMIT })
+  @Column({ length: NAME_LENGTH_LIMIT, type: 'character varying' })
   public name!: string;
 
-  @Column({ length: BUCKET_NAME_LENGTH_LIMIT })
+  @Column({ length: BUCKET_NAME_LENGTH_LIMIT, type: 'character varying' })
   public bucket!: string;
 
   @Index('Timestamp-idx')
-  @Column()
+  @Column({ type: 'timestamp without time zone' })
   public timestamp!: Date;
 
-  @Column({ nullable: true, length: DESCRIPTION_LENGTH_LIMIT })
+  @Column({ nullable: true, length: DESCRIPTION_LENGTH_LIMIT, type: 'character varying' })
   public description!: string;
 
   @Column({ name: 'sequence_number', type: 'integer', nullable: true })
