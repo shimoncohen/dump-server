@@ -21,11 +21,10 @@ export const DATA_SOURCE_PROVIDER = Symbol('dataSourceProvider');
  * @param dbConfig The typeorm postgres configuration with added SSL options.
  * @returns Options object ready to use with typeorm.
  */
-export const createConnectionOptions = (dbConfig: DbCommonConfig): DataSourceOptions => {
+export const createDataSourceOptions = (dbConfig: DbCommonConfig): DataSourceOptions => {
   let ssl: TlsOptions | undefined = undefined;
   const { ssl: inputSsl, ...dataSourceOptions } = dbConfig;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  //dataSourceOptions.extra = { application_name: `${hostname()}-${process.env.NODE_ENV ?? 'unknown_env'}` };
+
   if (inputSsl.enabled) {
     ssl = { key: readFileSync(inputSsl.key), cert: readFileSync(inputSsl.cert), ca: readFileSync(inputSsl.ca) };
   }
@@ -40,7 +39,7 @@ export const createConnectionOptions = (dbConfig: DbCommonConfig): DataSourceOpt
 
 export const initConnection = async (dbConfig: DbCommonConfig): Promise<DataSource> => {
   if (connectionSingleton === undefined || !connectionSingleton.isInitialized) {
-    connectionSingleton = new DataSource(createConnectionOptions(dbConfig));
+    connectionSingleton = new DataSource(createDataSourceOptions(dbConfig));
     await connectionSingleton.initialize();
   }
   return connectionSingleton;
@@ -59,6 +58,6 @@ export const dataSourceFactory: FactoryFunction<DataSource> = (): DataSource => 
   const config = getConfig();
   const dbConfig = config.get('db');
 
-  const dataSourceOptions = createConnectionOptions(dbConfig);
+  const dataSourceOptions = createDataSourceOptions(dbConfig);
   return new DataSource(dataSourceOptions);
 };

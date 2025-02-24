@@ -14,3 +14,4 @@ node_modules
 *.html
 helm
 reports
+.release-please-manifest.json
