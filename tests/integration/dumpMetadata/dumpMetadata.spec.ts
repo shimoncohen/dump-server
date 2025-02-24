@@ -46,7 +46,6 @@ describe('dumps', function () {
   beforeAll(async function () {
     await initConfig(true);
     const registerOptions = getBaseRegisterOptions();
-    registerOptions.override.push();
 
     const [initializedApp, initializedContainer] = await getApp({
       ...registerOptions,
