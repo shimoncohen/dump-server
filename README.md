@@ -19,6 +19,10 @@ Checkout the OpenAPI spec [here](/openapi3.yaml)
 ## Postgres prerequisite
 `uuid-ossp` extension must be installed in the database before you run the migrations.
 
+```sql
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
+
 ## Run Migrations
 don't forget to run migrations before you start the app
 
