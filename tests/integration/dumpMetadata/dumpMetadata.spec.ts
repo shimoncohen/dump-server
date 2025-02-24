@@ -1,9 +1,10 @@
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import httpStatusCodes from 'http-status-codes';
 import { Application } from 'express';
 import { isWithinInterval, isAfter, isBefore } from 'date-fns';
 import { omitBy, isNil } from 'lodash';
+import { CleanupRegistry } from '@map-colonies/cleanup-registry';
 import { DependencyContainer } from 'tsyringe';
 import { DumpMetadataCreation } from '../../../src/dumpMetadata/models/dumpMetadata';
 import { DumpMetadata, DUMP_METADATA_REPOSITORY_SYMBOL } from '../../../src/dumpMetadata/DAL/typeorm/dumpMetadata';
@@ -24,7 +25,6 @@ import {
 } from '../../helpers';
 import { DumpMetadataFilterQueryParams } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
 import { SortFilter } from '../../../src/dumpMetadata/models/dumpMetadataFilter';
-import { DATA_SOURCE_PROVIDER, initConnection } from '../../../src/common/db';
 import {
   BUCKET_NAME_LENGTH_LIMIT,
   BUCKET_NAME_MIN_LENGTH_LIMIT,
@@ -32,32 +32,37 @@ import {
   NAME_LENGTH_LIMIT,
   SERVICES,
 } from '../../../src/common/constants';
-import { getConfig, initConfig } from '../../../src/common/config';
+import { initConfig } from '../../../src/common/config';
 import { DumpMetadataRequestSender } from './helpers/requestSender';
 import { BAD_PATH, BEFORE_ALL_TIMEOUT, generateDumpsMetadataOnDb, getBaseRegisterOptions, HAPPY_PATH, SAD_PATH } from './helpers';
 
 describe('dumps', function () {
-  let container: DependencyContainer;
+  let depContainer: DependencyContainer;
   let app: Application;
-  let connection: DataSource;
   let repository: Repository<DumpMetadata>;
   let requestSender: DumpMetadataRequestSender;
   let mockRequestSender: DumpMetadataRequestSender;
 
   beforeAll(async function () {
     await initConfig(true);
-    const config = getConfig();
-    const dataSourceOptions = config.get('db');
-    connection = await initConnection(dataSourceOptions);
-    await connection.synchronize();
-    repository = connection.getRepository(DumpMetadata);
-    await repository.delete({});
     const registerOptions = getBaseRegisterOptions();
-    registerOptions.override.push({ token: DATA_SOURCE_PROVIDER, provider: { useValue: connection } });
-    registerOptions.override.push({ token: SERVICES.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(true) } });
+    registerOptions.override.push();
 
-    [container, app] = await getApp(registerOptions);
+    const [initializedApp, initializedContainer] = await getApp({
+      ...registerOptions,
+      override: [
+        ...registerOptions.override,
+        {
+          token: SERVICES.OBJECT_STORAGE,
+          provider: { useValue: getMockObjectStorageConfig(true) },
+        },
+      ],
+    });
+    app = initializedApp;
+    depContainer = initializedContainer;
+
     requestSender = new DumpMetadataRequestSender(app);
+    repository = depContainer.resolve(DUMP_METADATA_REPOSITORY_SYMBOL);
   }, BEFORE_ALL_TIMEOUT);
 
   afterEach(async function () {
@@ -65,8 +70,9 @@ describe('dumps', function () {
   });
 
   afterAll(async function () {
-    await connection.destroy();
-    container.reset();
+    const registry = depContainer.resolve<CleanupRegistry>(SERVICES.CLEANUP_REGISTRY);
+    await registry.trigger();
+    depContainer.reset();
   });
 
   describe('GET /dumps', function () {
@@ -244,13 +250,16 @@ describe('dumps', function () {
           provider: { useValue: { find: findMock } },
         });
 
-        const [, mockApp] = await getApp(mockRegisterOptions);
+        const [mockApp, mockContainer] = await getApp(mockRegisterOptions);
         mockRequestSender = new DumpMetadataRequestSender(mockApp);
 
         const response = await mockRequestSender.getDumpsMetadataByFilter({});
 
         expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
         expect(response.body).toHaveProperty('message', errorMessage);
+
+        await mockContainer.resolve<CleanupRegistry>(SERVICES.CLEANUP_REGISTRY).trigger();
+        mockContainer.reset();
       });
     });
   });
@@ -277,12 +286,15 @@ describe('dumps', function () {
 
         const mockRegisterOptions = getBaseRegisterOptions();
         mockRegisterOptions.override.push({ token: SERVICES.OBJECT_STORAGE, provider: { useValue: getMockObjectStorageConfig(false) } });
-        const [, mockApp] = await getApp(mockRegisterOptions);
+        const [mockApp, mockContainer] = await getApp(mockRegisterOptions);
         mockRequestSender = new DumpMetadataRequestSender(mockApp);
         const response = await mockRequestSender.getDumpMetadataById(fakeDumpMetadata.id);
 
         expect(response.status).toBe(httpStatusCodes.OK);
         expect(response.body).toMatchObject(integrationDumpMetadata);
+
+        await mockContainer.resolve<CleanupRegistry>(SERVICES.CLEANUP_REGISTRY).trigger();
+        mockContainer.reset();
       });
     });
 
@@ -313,13 +325,16 @@ describe('dumps', function () {
           provider: { useValue: { findOneBy: findOneByMock } },
         });
 
-        const [, mockApp] = await getApp(mockRegisterOptions);
+        const [mockApp, mockContainer] = await getApp(mockRegisterOptions);
         mockRequestSender = new DumpMetadataRequestSender(mockApp);
 
         const response = await mockRequestSender.getDumpMetadataById(faker.datatype.uuid());
 
         expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
         expect(response.body).toHaveProperty('message', errorMessage);
+
+        await mockContainer.resolve<CleanupRegistry>(SERVICES.CLEANUP_REGISTRY).trigger();
+        mockContainer.reset();
       });
     });
   });
@@ -440,13 +455,16 @@ describe('dumps', function () {
           provider: { useValue: { findOne: jest.fn(), insert: insertMock } },
         });
 
-        const [, mockApp] = await getApp(mockRegisterOptions);
+        const [mockApp, mockContainer] = await getApp(mockRegisterOptions);
         mockRequestSender = new DumpMetadataRequestSender(mockApp);
 
         const response = await mockRequestSender.createDump(createFakeDumpMetadata());
 
         expect(response.status).toBe(httpStatusCodes.INTERNAL_SERVER_ERROR);
         expect(response.body).toHaveProperty('message', errorMessage);
+
+        await mockContainer.resolve<CleanupRegistry>(SERVICES.CLEANUP_REGISTRY).trigger();
+        mockContainer.reset();
       });
     });
   });
