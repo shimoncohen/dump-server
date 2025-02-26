@@ -32,5 +32,4 @@ jobs:
       comment-creation-date: ${{ inputs.comment-creation-date }}
       versions: ${{ inputs.versions }}
       node-versions: ${{ inputs.node-versions }}
-      extensions: ''
       db-schema: dump_server
