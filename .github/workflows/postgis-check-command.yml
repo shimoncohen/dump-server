@@ -18,10 +18,13 @@ on:
       node-versions:
         description: 'Node.js versions to check'
         required: false
+      extensions:
+        description: 'Postgres extensions to install'
+        required: false
 
 jobs:
   postgis_check:
-    uses: MapColonies/shared-workflows/.github/workflows/postgis-check-command.yml@master
+    uses: MapColonies/shared-workflows/.github/workflows/postgis-check-command.yml@fix-postgis-check
     secrets: inherit
     with:
       head-sha: ${{ inputs.head-sha }}
@@ -29,4 +32,5 @@ jobs:
       comment-creation-date: ${{ inputs.comment-creation-date }}
       versions: ${{ inputs.versions }}
       node-versions: ${{ inputs.node-versions }}
+      extensions: 'uuid-ossp,boolean_cascaded'
       db-schema: dump_server
